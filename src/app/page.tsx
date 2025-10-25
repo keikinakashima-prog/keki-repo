@@ -11,7 +11,8 @@ export default function Home() {
   const handleIncrement = () => setCount(count + 1);
   const handleDecrement = () => setCount(count - 1);
   const handleReset = () => setCount(0);
-  const goToPage1 = () => router.push("/page1"); // ← ページ移動関数！
+  const goToPage1 = () => router.push("/page1/app"); // ← ページ移動関数！
+    const goToPage2 = () => router.push("/page2/app"); // ← ページ移動関数！
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
@@ -46,7 +47,12 @@ export default function Home() {
             onClick={goToPage1}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
-            Page1へ移動
+            Page1へ移動</button>
+          <button
+            onClick={goToPage2}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            Page2へ移動
           </button>
         </div>
       </main>
