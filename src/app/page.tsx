@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // ← これがポイント！
 import Image from "next/image";
 
 export default function Home() {
   const [count, setCount] = useState(0);
+  const router = useRouter(); // ← ルーターを使えるようにする！
 
   const handleIncrement = () => setCount(count + 1);
   const handleDecrement = () => setCount(count - 1);
   const handleReset = () => setCount(0);
+  const goToPage1 = () => router.push("/page1"); // ← ページ移動関数！
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
@@ -18,11 +21,9 @@ export default function Home() {
           <li className="tracking-[-.01em]">尊敬しています先生</li>
         </ol>
 
-        {/* カウント表示 */}
         <div className="text-xl font-bold">カウント: {count}</div>
 
-        {/* ボタンたち */}
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           <button
             onClick={handleIncrement}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -40,6 +41,12 @@ export default function Home() {
             className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
           >
             リセット
+          </button>
+          <button
+            onClick={goToPage1}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            Page1へ移動
           </button>
         </div>
       </main>
