@@ -20,17 +20,62 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+# keki-repo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next.js（App Router）で作成されたサンプルプロジェクトです。AIチャット（OpenAI）やCSVデータビューアなどの機能を含みます。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**必要条件**
 
-## Deploy on Vercel
+- Node.js 18 以上
+- npm / pnpm / yarn
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**セットアップ（ローカル開発）**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. 依存をインストール
+
+```bash
+npm install
+```
+
+2. 開発サーバを起動
+
+```bash
+npm run dev
+```
+
+ブラウザで http://localhost:3000 を開いてください。
+
+**環境変数**
+
+AIチャットや外部検索を使う場合、ルートに `.env.local` を作成して以下を設定します。
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
+GOOGLE_API_KEY=your_google_api_key_here
+GOOGLE_CX=your_google_cx_here
+```
+
+**主な機能（概要）**
+
+- ホームページ: `app/page.tsx`
+- Page1: Not Found 風のページ（戻るボタン）
+- Page2: プレースホルダページ
+- Page3: AI 対戦のじゃんけんゲーム
+- Page4: AIチャット（任意でウェブ検索統合）
+- Data Viewer: `data.csv` を表示するビュー
+
+**開発コマンド**
+
+- `npm run dev` — 開発サーバを起動
+- `npm run build` — 本番ビルド
+- `npm run start` — ビルド後にサーバ起動
+
+**デプロイ**
+
+Vercel にデプロイするのが簡単です。詳細は Next.js のデプロイドキュメントを参照してください。
+
+**参考**
+
+- Next.js ドキュメント: https://nextjs.org/docs
+- Next.js GitHub: https://github.com/vercel/next.js

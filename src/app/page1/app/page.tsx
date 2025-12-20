@@ -1,40 +1,69 @@
-// ...existing code...
+"use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 
-export default function Page(): JSX.Element {
+export default function Page() {
+    const router = useRouter();
+
+    const goBack = () => {
+        if (typeof window !== "undefined" && window.history.length > 1) {
+            router.back();
+        } else {
+            router.push("/");
+        }
+    };
+
     return (
-        <main
-            style={{
-                minHeight: "100vh",
-                margin: 0,
-                padding: "2rem",
-                backgroundColor: "#bfefff", // 水色
-                color: "#012a4a",
-                boxSizing: "border-box",
-            }}
-        >
-            <h1>水色の背景</h1>
-            <p>このページは水色の背景で表示されます。</p>
-
-            
-
-
-            <p>
-                <a
-                    href="https://broken-mausoleum-5vvrjq4wrq9cp76w-3000.app.github.dev/"
-                    style={{
-                        display: "inline-block",
-                        padding: "0.5rem 1rem",
-                        backgroundColor: "#023e8a",
-                        color: "#fff",
-                        textDecoration: "none",
-                        borderRadius: "4px",
-                    }}
-                >
-                   戻る
-                </a>
-            </p>
-        </main>
+        <div style={styles.container}>
+            <div style={styles.card}>
+                <h1 style={{ marginTop: 0, fontSize: 48, fontWeight: "bold" }}>404</h1>
+                <h2 style={{ marginTop: 8 }}>ページが見つかりません</h2>
+                <p style={{ color: "#666", marginBottom: 24 }}>申し訳ございませんが、ご指定のページは見つかりませんでした。</p>
+                <div style={styles.btnRow}>
+                    <button style={styles.button} onClick={goBack}>
+                        ← 戻る
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }
-// ...existing code...
+
+const styles: { [k: string]: React.CSSProperties } = {
+    page: {
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+        background: "#f5f7fb",
+    },
+    container: {
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+        background: "#fff5f5",
+    },
+    card: {
+        width: 480,
+        maxWidth: "95%",
+        padding: 20,
+        borderRadius: 8,
+        boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+        background: "#fff",
+    },
+    btnRow: {
+        marginTop: 16,
+        display: "flex",
+        alignItems: "center",
+    },
+    button: {
+        padding: "8px 14px",
+        borderRadius: 6,
+        border: "1px solid #ddd",
+        background: "#fff",
+        cursor: "pointer",
+    },
+};

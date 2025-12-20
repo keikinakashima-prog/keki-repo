@@ -4,6 +4,24 @@ import { useState, useRef, useEffect } from 'react';
 type Choice = 'rock' | 'paper' | 'scissors' | null;
 type Result = 'win' | 'lose' | 'draw' | null;
 
+type Locale = {
+    title: string;
+    choices: { rock: string; paper: string; scissors: string };
+    you: string;
+    computer: string;
+    youWin: string;
+    youLose: string;
+    draw: string;
+    score: string;
+    wins: string;
+    draws: string;
+    losses: string;
+    reset: string;
+    gameOverTitle?: string;
+    gameOverMsg?: string;
+    playAgain?: string;
+};
+
 export default function RockPaperScissors() {
     // language state and translations
     const availableLanguages = [
@@ -18,7 +36,7 @@ export default function RockPaperScissors() {
         { code: 'ru', name: 'Русский' }
     ];
 
-    const translations: Record<string, any> = {
+    const translations: Record<string, Locale> = {
         en: {
             title: 'Rock Paper Scissors',
             choices: { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' },
@@ -32,6 +50,10 @@ export default function RockPaperScissors() {
             draws: 'Draws',
             losses: 'Losses',
             reset: 'Reset'
+        ,
+            gameOverTitle: 'Game Over',
+            gameOverMsg: 'You lost 10 times.',
+            playAgain: 'Play Again'
         },
         ja: {
             title: 'じゃんけん',
@@ -46,6 +68,10 @@ export default function RockPaperScissors() {
             draws: '分',
             losses: '負',
             reset: 'リセット'
+        ,
+            gameOverTitle: 'ゲームオーバー',
+            gameOverMsg: '負けが10回になりました。',
+            playAgain: 'もう一度遊ぶ'
         },
         es: {
             title: 'Piedra Papel Tijeras',
@@ -151,17 +177,20 @@ export default function RockPaperScissors() {
         try {
             const saved = localStorage.getItem('rps_lang');
             if (saved) return saved;
-        } catch (e) {}
+        } catch {
+        }
         return navigator.language?.slice(0, 2) || 'en';
     });
 
     useEffect(() => {
         try {
             localStorage.setItem('rps_lang', lang);
-        } catch (e) {}
+        } catch {
+        }
     }, [lang]);
 
-    const t = (key: string) => (translations[lang] && translations[lang][key]) || translations['en'][key];
+    type LocaleKey = Exclude<keyof Locale, 'choices'>;
+    const t = (key: LocaleKey): string => (translations[lang]?.[key] as string) ?? (translations['en'][key] as string);
     const [playerChoice, setPlayerChoice] = useState<Choice>(null);
     const [computerChoice, setComputerChoice] = useState<Choice>(null);
     const [result, setResult] = useState<Result>(null);
@@ -174,8 +203,31 @@ export default function RockPaperScissors() {
         scissors: '✌️',
     };
 
-    const getComputerChoice = (): Choice => {
-        return choices[Math.floor(Math.random() * 3)];
+    // Biased computer choice: make the player lose ~66.66666% of the time.
+    // For a given player choice, computer will pick the winning hand with probability 2/3,
+    // pick the same hand (draw) with probability 1/6, and pick the losing hand (player win)
+    // with probability 1/6.
+    const getBiasedComputerChoice = (player: Exclude<Choice, null>): Choice => {
+        const r = Math.random();
+        // mapping: for player -> winning hand
+        const winningForPlayer: Record<string, Choice> = {
+            rock: 'paper',
+            paper: 'scissors',
+            scissors: 'rock',
+        };
+        const losingForPlayer: Record<string, Choice> = {
+            rock: 'scissors',
+            paper: 'rock',
+            scissors: 'paper',
+        };
+
+        if (r < 2 / 3) {
+            return winningForPlayer[player];
+        } else if (r < 5 / 6) {
+            return player; // draw
+        } else {
+            return losingForPlayer[player]; // player wins
+        }
     };
 
     const judgeGame = (player: Choice, computer: Choice): Result => {
@@ -201,6 +253,7 @@ export default function RockPaperScissors() {
         delay: number;
         duration: number;
     }>>([]);
+    const [gameOver, setGameOver] = useState(false);
 
     const play = (choice: Choice) => {
         if (!choice || isAnimating) return;
@@ -224,7 +277,7 @@ export default function RockPaperScissors() {
                 animationIntervalRef.current = null;
             }
 
-            const computer = getComputerChoice();
+            const computer = getBiasedComputerChoice(choice);
             const gameResult = judgeGame(choice, computer);
 
             setComputerChoice(computer);
@@ -242,13 +295,13 @@ export default function RockPaperScissors() {
                     losses: gameResult === 'lose' ? prev.losses + 1 : prev.losses,
                     draws: gameResult === 'draw' ? prev.draws + 1 : prev.draws,
                 };
-                if (newScore.losses >= 10) {
-                    // show game over screen (English message)
-                    setGameOver(true);
-                    // stop any ongoing animations/confetti
-                    setIsAnimating(false);
-                    setConfetti([]);
-                }
+                    if (newScore.losses >= 10) {
+                        // show game over screen
+                        setGameOver(true);
+                        // stop any ongoing animations/confetti
+                        setIsAnimating(false);
+                        setConfetti([]);
+                    }
                 return newScore;
             });
 
@@ -293,6 +346,7 @@ export default function RockPaperScissors() {
         setComputerChoice(null);
         setResult(null);
         setScore({ wins: 0, losses: 0, draws: 0 });
+        setGameOver(false);
     };
 
     return (
@@ -353,6 +407,16 @@ export default function RockPaperScissors() {
                                 }}
                             />
                         ))}
+                    </div>
+                )}
+
+                {/* Game Over overlay: static full gray background with red "Game over" text */}
+                {gameOver && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-gray-10000/90 z-50">
+                        <div className="text-center p-6">
+                            <h2 className="text-6xl font-extrabold text-red-600 drop-shadow-md">Game over</h2>
+                            <p className="text-white/90 mt-3 mb-6">{t('gameOverMsg') || ''}</p>
+                        </div>
                     </div>
                 )}
 
