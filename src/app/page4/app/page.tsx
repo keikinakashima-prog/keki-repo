@@ -40,6 +40,50 @@ export default function Page4() {
     }
   };
 
+  const renderContent = (content: string) => {
+    // try JSON
+    try {
+      const obj = JSON.parse(content);
+      return (
+        <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded text-sm overflow-auto">
+          {JSON.stringify(obj, null, 2)}
+        </pre>
+      );
+    } catch (e) {
+      // not JSON
+    }
+
+    // simple CSV detection: multiple lines and commas
+    if (content.includes('\n') && content.includes(',')) {
+      const rows = content.trim().split('\n').map((r) => r.split(','));
+      return (
+        <div className="overflow-auto">
+          <table className="min-w-full table-fixed border border-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {rows[0].map((h, i) => (
+                  <th key={i} className="text-left px-2 py-1 border">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.slice(1).map((row, ri) => (
+                <tr key={ri} className="even:bg-white odd:bg-gray-50">
+                  {row.map((cell, ci) => (
+                    <td key={ci} className="px-2 py-1 border text-sm">{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    // plain text (preserve line breaks)
+    return <div className="whitespace-pre-wrap text-sm">{content}</div>;
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-6">
@@ -68,10 +112,10 @@ export default function Page4() {
         </div>
         <div className="h-96 overflow-y-auto border border-gray-300 rounded p-4 mb-4">
           {messages.map((msg, index) => (
-            <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-              <span className={`inline-block p-2 rounded ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
-                {msg.content}
-              </span>
+            <div key={index} className={`mb-3 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+              <div className={`inline-block max-w-[80%] p-3 rounded-lg shadow-sm ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-white text-black border'}`}>
+                {renderContent(msg.content)}
+              </div>
             </div>
           ))}
         </div>
