@@ -142,6 +142,53 @@ export async function POST(request: Request) {
             return new Response(JSON.stringify({ reply: currentInfo }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
 
+        // If the user is asking for photos, try to extract a search term and fetch from JSONPlaceholder
+        function isPhotoRequest(text: string) {
+            const lower = text.toLowerCase();
+            const photoKeywords = ['photo', 'photos', 'image', 'images', '写真', '画像', 'フォト', '写真を見せて', '見せて'];
+            return photoKeywords.some(k => lower.includes(k));
+        }
+
+        function extractPhotoQuery(text: string) {
+            const lower = text.toLowerCase();
+            // patterns like "photos of cats", "show photos cats", "写真 猫", "猫の写真"
+            const ofMatch = lower.match(/(?:photos?|images?|写真|画像|フォト)\s+(?:of\s+)?(.+)/i);
+            if (ofMatch && ofMatch[1]) return ofMatch[1].trim();
+            const japaneseMatch = lower.match(/(.+?)の?(写真|画像)/);
+            if (japaneseMatch && japaneseMatch[1]) return japaneseMatch[1].trim();
+            // fallback: try last word(s)
+            const parts = lower.split(/\s+/);
+            if (parts.length > 1) return parts.slice(-2).join(' ').trim();
+            return '';
+        }
+
+        if (isPhotoRequest(lastUserMessage)) {
+            const queryTerm = extractPhotoQuery(lastUserMessage);
+            try {
+                let url = 'https://jsonplaceholder.typicode.com/photos?_limit=8';
+                if (queryTerm) {
+                    url = `https://jsonplaceholder.typicode.com/photos?title_like=${encodeURIComponent(queryTerm)}&_limit=8`;
+                }
+                let res = await fetch(url);
+                let photos = [];
+                if (res.ok) {
+                    photos = await res.json();
+                }
+                // If no photos found with queryTerm, fall back to unfiltered fetch
+                if ((!photos || photos.length === 0) && queryTerm) {
+                    res = await fetch('https://jsonplaceholder.typicode.com/photos?_limit=8');
+                    if (res.ok) photos = await res.json();
+                }
+
+                if (photos && photos.length > 0) {
+                    return new Response(JSON.stringify({ reply: JSON.stringify({ photos }) }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+                }
+            } catch (e) {
+                console.error('Photos fetch error:', e);
+            }
+            return new Response(JSON.stringify({ reply: '写真を取得できませんでした。' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+
         const useWeb = !!body?.useWebSearch;
         const useUsers = !!body?.useUsers;
 
